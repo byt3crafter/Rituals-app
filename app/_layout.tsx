@@ -2,13 +2,13 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useFastingStore } from '@/store/useFastingStore';
+import { useRitualStore } from '@/store/useRitualStore';
 import { useEffect } from 'react';
 import CompletionAnimation from '@/components/animations/CompletionAnimation';
 import { theme } from '@/styles/theme';
 
 export default function RootLayout() {
-  const { state: fastingState, hydrate } = useFastingStore();
+  const { state: ritualState, hydrate } = useRitualStore();
   
   useEffect(() => {
     hydrate();
@@ -19,7 +19,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.base } }} />
-        {fastingState === 'completed' && <CompletionAnimation />}
+        {ritualState === 'completed' && <CompletionAnimation />}
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

@@ -1,10 +1,15 @@
-export type FastingState = 'idle' | 'committing' | 'scheduled' | 'active' | 'completed' | 'aborted';
+export type RitualState = 'idle' | 'active' | 'completed' | 'aborted';
+export type RitualCategory = 'Body' | 'Mind' | 'Spirit';
+export type TrackingMethod = 'timer' | 'check-in';
 
-export type FastingPlan = {
+export interface Ritual {
   id: string;
   name: string;
-  durationHours: number;
-};
+  category: RitualCategory;
+  intention: string;
+  trackingMethod: TrackingMethod;
+  durationHours?: number; // Optional, only for timer-based rituals
+}
 
 export type Intention = {
   id: number;
@@ -12,10 +17,12 @@ export type Intention = {
   completed: boolean;
 };
 
-export type FastingSession = {
+export type RitualSession = {
+  ritualId: string;
+  ritualName: string;
   startTime: number;
   endTime: number;
-  durationHours: number;
+  durationHours?: number;
   completed: boolean;
 };
 
@@ -27,8 +34,6 @@ export type MentorMessage = {
   sender: 'user' | 'mentor';
   isLoading?: boolean;
 };
-
-export type MealChoice = 'breakfast' | 'lunch' | 'dinner';
 
 export type MilestoneInfo = {
   hour: number;

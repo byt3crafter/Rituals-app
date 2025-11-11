@@ -1,16 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
-import { useFastingStore } from '@/store/useFastingStore';
+import { useRitualStore } from '@/store/useRitualStore';
 import FastingChart from '@/components/common/FastingChart';
-import { FastingSession } from '@/types';
+import { RitualSession } from '@/types';
 import { theme } from '@/styles/theme';
 import DisciplineSigil from '@/components/progress/DisciplineSigil';
 import StreakFlame from '@/components/progress/StreakFlame';
 
-const calculateMetrics = (history: FastingSession[]) => {
-  const totalFasts = history.length;
-  const completedFasts = history.filter(s => s.completed).length;
-  const disciplineScore = totalFasts > 0 ? Math.round((completedFasts / totalFasts) * 100) : 100;
+const calculateMetrics = (history: RitualSession[]) => {
+  const totalRituals = history.length;
+  const completedRituals = history.filter(s => s.completed).length;
+  const disciplineScore = totalRituals > 0 ? Math.round((completedRituals / totalRituals) * 100) : 100;
 
   let streak = 0;
   const sortedHistory = [...history].sort((a, b) => b.startTime - a.startTime);
@@ -21,24 +21,25 @@ const calculateMetrics = (history: FastingSession[]) => {
       break;
     }
   }
+  
+  const timerHistory = history.filter(s => s.durationHours !== undefined);
 
-  const totalHours = history.reduce((acc, s) => {
+  const totalHours = timerHistory.reduce((acc, s) => {
     if (s.completed) {
-        return acc + s.durationHours;
+        return acc + s.durationHours!;
     }
-    // For aborted fasts, calculate actual duration
     const actualDuration = (s.endTime - s.startTime) / (1000 * 60 * 60);
     return acc + actualDuration;
   }, 0);
 
-  const longestFast = history.reduce((max, s) => s.completed && s.durationHours > max ? s.durationHours : max, 0);
+  const longestFast = timerHistory.reduce((max, s) => s.completed && s.durationHours! > max ? s.durationHours! : max, 0);
 
-  return { disciplineScore, streak, totalHours: Math.floor(totalHours), longestFast, ritualsCompleted: completedFasts };
+  return { disciplineScore, streak, totalHours: Math.floor(totalHours), longestFast, ritualsCompleted: completedRituals, fastingHistory: timerHistory };
 };
 
 const ProgressScreen = () => {
-  const history = useFastingStore((s) => s.history);
-  const { disciplineScore, streak, totalHours, longestFast, ritualsCompleted } = calculateMetrics(history);
+  const history = useRitualStore((s) => s.history);
+  const { disciplineScore, streak, totalHours, longestFast, ritualsCompleted, fastingHistory } = calculateMetrics(history);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -58,25 +59,33 @@ const ProgressScreen = () => {
 
         <View style={styles.recordsContainer}>
           <Text style={styles.sectionTitle}>Personal Records</Text>
-          <View style={styles.recordRow}>
-            <Text style={styles.recordLabel}>Total Hours in Ritual</Text>
-            <Text style={styles.recordValue}>{totalHours}</Text>
-          </View>
-           <View style={styles.recordRow}>
-            <Text style={styles.recordLabel}>Deepest Ritual</Text>
-            <Text style={styles.recordValue}>{longestFast}h</Text>
-          </View>
            <View style={styles.recordRow}>
             <Text style={styles.recordLabel}>Rituals Completed</Text>
             <Text style={styles.recordValue}>{ritualsCompleted}</Text>
           </View>
+          {fastingHistory.length > 0 && (
+            <>
+                <View style={styles.recordRow}>
+                    <Text style={styles.recordLabel}>Total Hours in Ritual</Text>
+                    <Text style={styles.recordValue}>{totalHours}</Text>
+                </View>
+                <View style={styles.recordRow}>
+                    <Text style={styles.recordLabel}>Deepest Fast</Text>
+                    <Text style={styles.recordValue}>{longestFast}h</Text>
+                </View>
+            </>
+          )}
         </View>
+        
+        {fastingHistory.length > 0 && (
+            <>
+                <Text style={styles.sectionTitle}>7-Day Fasting History</Text>
+                <FastingChart data={fastingHistory as any} /> 
+            </>
+        )}
 
-        <Text style={styles.sectionTitle}>7-Day History</Text>
-        {history.length > 0 ? (
-          <FastingChart data={history} />
-        ) : (
-          <Text style={styles.noDataText}>Complete a ritual to see your progress here.</Text>
+        {history.length === 0 && (
+            <Text style={styles.noDataText}>Complete a ritual to see your progress here.</Text>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -123,7 +132,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: theme.colors.onBase,
     marginBottom: theme.spacing.medium,
-    alignSelf: 'flex-start'
+    alignSelf: 'flex-start',
+    marginTop: theme.spacing.medium,
   },
   noDataText: {
     color: theme.colors.onSurfaceFaded,

@@ -1,36 +1,40 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, SafeAreaView, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import LottieView from 'lottie-react-native';
-import { useFastingStore } from '@/store/useFastingStore';
+import { useRitualStore } from '@/store/useRitualStore';
 import { getMentorResponse } from '@/services/geminiService';
 import { speak } from '@/services/speechService';
-import { MentorMessage } from '@/types';
+import { MentorMessage, Ritual } from '@/types';
 import { theme } from '@/styles/theme';
 import { MILESTONES } from '@/constants';
 
-const getInitialMessage = (fastingState: string, startTime: number | null): string => {
-    if (fastingState !== 'active' || !startTime) {
+const getInitialMessage = (ritual: Ritual | null, startTime: number | null): string => {
+    if (!ritual || !startTime) {
         return 'Welcome. How can I support your ritual today?';
     }
-    const hoursElapsed = (Date.now() - startTime) / (1000 * 60 * 60);
-    const currentMilestone = MILESTONES.slice().reverse().find(m => hoursElapsed >= m.hour);
 
-    if (currentMilestone) {
-        return `You are in the stage of "${currentMilestone.name}". What clarity are you seeking?`;
+    if (ritual.id.includes('fasting')) {
+        const hoursElapsed = (Date.now() - startTime) / (1000 * 60 * 60);
+        const currentMilestone = MILESTONES.slice().reverse().find(m => hoursElapsed >= m.hour);
+        if (currentMilestone) {
+            return `You are in the stage of "${currentMilestone.name}". What clarity are you seeking?`;
+        }
+        return 'The ritual has just begun. What is your intention for this fast?';
     }
-    return 'The ritual has just begun. What is your intention for this fast?';
+
+    return `You are practicing "${ritual.name}". How can I help you deepen this ritual?`;
 }
 
 const MentorScreen = () => {
-  const { state: fastingState, startTime } = useFastingStore();
+  const { state, activeRitual, startTime } = useRitualStore();
   const [messages, setMessages] = useState<MentorMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    setMessages([{ id: 1, text: getInitialMessage(fastingState, startTime), sender: 'mentor' }]);
-  }, [fastingState, startTime]);
+    setMessages([{ id: 1, text: getInitialMessage(activeRitual, startTime), sender: 'mentor' }]);
+  }, [state, activeRitual, startTime]);
 
   const handleSend = async () => {
     if (input.trim() === '' || isLoading) return;
@@ -43,16 +47,15 @@ const MentorScreen = () => {
     const loadingMessage: MentorMessage = { id: Date.now() + 1, text: '...', sender: 'mentor', isLoading: true };
     setMessages(prev => [...prev, loadingMessage]);
     
-    const fastingHours = startTime ? (Date.now() - startTime) / (1000 * 60 * 60) : 0;
-    
-    if (fastingState !== 'active') {
-        const reply = "Begin a fast to speak with me. I am here to guide you on your journey.";
+    if (state !== 'active' || !activeRitual || !activeRitual.id.includes('fasting')) {
+        const reply = "The mentor provides guidance during fasting rituals. For other practices, the journey is your own.";
         setMessages(prev => prev.slice(0, -1).concat({ id: Date.now() + 1, text: reply, sender: 'mentor' }));
         speak(reply);
         setIsLoading(false);
         return;
     }
 
+    const fastingHours = startTime ? (Date.now() - startTime) / (1000 * 60 * 60) : 0;
     const mentorReply = await getMentorResponse(input, fastingHours);
     
     setMessages(prev => prev.slice(0, -1).concat({ id: Date.now() + 1, text: mentorReply, sender: 'mentor' }));

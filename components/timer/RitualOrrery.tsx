@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
-import Svg, { Circle, Path, Text as SvgText, TSpan } from 'react-native-svg';
+import Svg, { Circle, Path, Text as SvgText } from 'react-native-svg';
 import Animated, { useSharedValue, withTiming, useAnimatedProps } from 'react-native-reanimated';
 import { theme } from '@/styles/theme';
 import { MILESTONES } from '@/constants';
@@ -13,7 +13,6 @@ interface RitualOrreryProps {
   elapsedHours: number;
   totalHours: number;
   onMilestonePress: (milestone: MilestoneInfo) => void;
-  timeLabel: string;
   timeValue: string;
 }
 
@@ -71,9 +70,6 @@ const RitualOrrery: React.FC<RitualOrreryProps> = ({ progress, elapsedHours, tot
     });
   };
   
-  // Split time for styling, HH:MM and :SS
-  const [hhmm, ss] = timeValue.split(/(?=:\d\d$)/);
-
   return (
     <View style={styles.container}>
       <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -106,7 +102,7 @@ const RitualOrrery: React.FC<RitualOrreryProps> = ({ progress, elapsedHours, tot
           fill={theme.colors.onSurfaceFaded}
           opacity={0.7}
         >
-          Remaining
+          Time Remaining
         </SvgText>
         
         {/* Centered Monospaced Timer */}
@@ -151,7 +147,6 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       borderWidth: 2,
       borderColor: theme.colors.base,
-      transition: 'background-color 0.5s ease', // For web, native needs reanimated
   },
   milestoneIconBgAchieved: {
       backgroundColor: theme.colors.secondary, // "Illuminated" state

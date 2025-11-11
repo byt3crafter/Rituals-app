@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import LottieView from 'lottie-react-native';
-import { useFastingStore } from '@/store/useFastingStore';
+import { useRitualStore } from '@/store/useRitualStore';
 import { playCompletionSound } from '@/services/soundService';
 import { hapticFeedback } from '@/services/hapticsService';
 import { theme } from '@/styles/theme';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 
 const CompletionAnimation: React.FC = () => {
-  const resetToIdle = useFastingStore((s) => s.resetToIdle);
+  const resetToIdle = useRitualStore((s) => s.resetToIdle);
 
   useEffect(() => {
     playCompletionSound();

@@ -1,16 +1,56 @@
-import { FastingPlan, MilestoneInfo } from './types';
+import { Ritual, MilestoneInfo } from './types';
 
-export const FASTING_PLANS: FastingPlan[] = [
-  { id: '16:8', name: '16:8', durationHours: 16 },
-  { id: '18:6', name: '18:6', durationHours: 18 },
-  { id: '20:4', name: '20:4', durationHours: 20 },
-  { id: 'omad', name: 'OMAD', durationHours: 23 }, // One Meal A Day, typically 23:1
-];
+export const RITUALS: Ritual[] = [
+  // Body Rituals
+  {
+    id: 'fasting-16-8',
+    name: '16:8 Fasting',
+    category: 'Body',
+    intention: 'To build discipline and improve metabolic health through intermittent fasting.',
+    trackingMethod: 'timer',
+    durationHours: 16,
+  },
+  {
+    id: 'omad',
+    name: 'OMAD',
+    category: 'Body',
+    intention: 'One Meal A Day for deep metabolic reset and heightened discipline.',
+    trackingMethod: 'timer',
+    durationHours: 23,
+  },
 
-export const DEFAULT_INTENTIONS = [
-  { id: 1, text: 'Stay hydrated', completed: false },
-  { id: 2, text: 'Be mindful of my body', completed: false },
-  { id: 3, text: 'Embrace the clarity', completed: false },
+  // Mind Rituals
+  {
+    id: 'stoic-pause',
+    name: 'The Stoic Pause',
+    category: 'Mind',
+    intention: 'When angered or agitated, pause and breathe before responding to cultivate tranquility.',
+    trackingMethod: 'check-in',
+  },
+  {
+    id: 'deep-work-90',
+    name: 'Deep Work Block',
+    category: 'Mind',
+    intention: 'Commit to 90 minutes of single-tasked focus with zero distractions.',
+    trackingMethod: 'timer',
+    durationHours: 1.5,
+  },
+
+  // Spirit Rituals
+  {
+    id: 'digital-sunset',
+    name: 'Digital Sunset',
+    category: 'Spirit',
+    intention: 'Disconnect from all screens one hour before bed to improve sleep and presence.',
+    trackingMethod: 'check-in',
+  },
+  {
+    id: 'morning-intention',
+    name: 'Morning Intention',
+    category: 'Spirit',
+    intention: 'Upon waking, define the single most important goal for the day ahead.',
+    trackingMethod: 'check-in',
+  },
 ];
 
 export const MILESTONES: MilestoneInfo[] = [
